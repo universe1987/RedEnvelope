@@ -28,38 +28,74 @@ def calculate_moments(sample, n_moments):
 
 
 def evaluate_by_moments(moments, threshold):
-    ratios = moments.max(axis=1) / moments.min(axis=1)
+    epsilon = 0.0000001
+    ratios = (moments.max(axis=1) + epsilon) / (moments.min(axis=1) + epsilon)
     result = ratios.max()
     print ratios
     return result < threshold
 
 
+def evaluate_by_variance(moments, threshold):
+    var = moments[1] - moments[0] ** 2
+    print 'var =', var.min()
+    return var.min() > threshold
+
+
 def visualize(sample):
-    pass
+    n_col = sample.shape[1]
+    f, axarr = plt.subplots(2, 2)
+    axarr[0, 0].hist(sample[:, 0], bins=100, normed=1)
+    axarr[0, 1].hist(sample[:, n_col/3], bins=100, normed=1)
+    axarr[1, 0].hist(sample[:, 2 * n_col/3], bins=100, normed=1)
+    axarr[1, 1].hist(sample[:, -1], bins=100, normed=1)
+    plt.show()
 
 
-def evaluate(distribution_method):
+def evaluate(distribution_method, vis=False):
     sample, elapsed = simulate(10, 100000, distribution_method)
     print '{} seconds'.format(elapsed)
     moments = calculate_moments(sample, 4)
     fair = evaluate_by_moments(moments, 1.1)
-    if fair:
-        print 'pass'
-    else:
-        print 'fail'
+    fun = evaluate_by_variance(moments, 0.001)
+    efficient = elapsed < 1
+    status = 'PASSED' if fair and efficient and fun else 'FAILED'
+    fairness = 'FAIR' if fair else 'UNFAIR'
+    efficiency = 'WITHIN' if efficient else 'EXCEED'
+    funness = 'FUN' if fun else 'BORING'
+    print '{} {}, it is {}, {}, {} time limit'.format(
+        distribution_method.func_name, status, fairness, funness, efficiency)
+    if vis:
+        visualize(sample)
 
 
-def beta_sample(j, current_amount, num_people):
-    c = 1.5
+def sample_by_beta(j, current_amount, num_people):
+    c = 2
     x = np.random.beta(c, c*(j-1))
     return current_amount * x
 
 
-def order_sample(j, current_amount, num_people):
-    x = np.random.rand(j-1).min()
-    return current_amount * x
+def sample_by_order_statistics(j, current_amount, num_people):
+    x = sorted(np.random.rand(2*j-1))
+    return current_amount * x[1]
+
+
+def sample_by_gaussian(j, current_amount, num_people):
+    x = max(np.random.normal(1.0/j, 0.1/j), 0)
+    return current_amount * min(x, 1)
+
+
+def sample_by_gaussian2(j, current_amount, num_people):
+    x = max(np.random.normal(1.0/j, 0.5/j), 0)
+    return current_amount * min(x, 1)
+
+
+def sample_by_dirac(j, current_amount, num_people):
+    return current_amount / float(j)
 
 
 if __name__ == '__main__':
-    evaluate(beta_sample)
-    evaluate(order_sample)
+    evaluate(sample_by_beta)
+    evaluate(sample_by_order_statistics)
+    evaluate(sample_by_gaussian)
+    evaluate(sample_by_gaussian2)
+    evaluate(sample_by_dirac)
