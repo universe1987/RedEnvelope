@@ -52,7 +52,9 @@ def visualize(sample):
 def evaluate(distribution_method, vis=False):
     print '-' * 40
     print 'Evaluating', distribution_method.func_name
-    sample, elapsed = simulate(10, 100000, distribution_method)
+    sample, elapsed = simulate(4, 1000000, distribution_method)
+    if vis:
+        visualize(sample)
     print 'time elapsed:', elapsed
     m_params = {'n_moments': 4, 'threshold': 0.1}
     result = evaluate_by_moments(sample, m_params)
@@ -64,12 +66,10 @@ def evaluate(distribution_method, vis=False):
     if not result:
         print 'FAILED, variance is too small'
         return
-    if elapsed > 1:
+    if elapsed > 2:
         print 'FAILED, too slow'
         return
     print 'PASSED'
-    if vis:
-        visualize(sample)
 
 
 def sample_by_beta(j, current_amount, num_people):
@@ -98,8 +98,8 @@ def sample_by_dirac(j, current_amount, num_people):
 
 
 if __name__ == '__main__':
-    evaluate(sample_by_beta)
-    evaluate(sample_by_order_statistics)
-    evaluate(sample_by_gaussian)
-    evaluate(sample_by_gaussian2)
-    evaluate(sample_by_dirac)
+    evaluate(sample_by_beta, vis=True)
+    # evaluate(sample_by_order_statistics)
+    # evaluate(sample_by_gaussian)
+    # evaluate(sample_by_gaussian2)
+    # evaluate(sample_by_dirac)
