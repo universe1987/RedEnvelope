@@ -1,5 +1,5 @@
 # RedEnvelope
-A better red envelope machenism for WeChat
+A better red envelope mechanism for WeChat
 
 [WeChat red envelope](https://en.wikipedia.org/wiki/WeChat_red_envelope}) enables a user to send money with some degree of randomness. A red envelope is determined by two numbers: amount of money *M* and number of receivers *N*. Receiver *k* gets a random amount of money *X_k*, adding up to *M*. This problem is simplified as generating *N* random variables adding to *1*.
 
