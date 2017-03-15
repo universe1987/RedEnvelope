@@ -9,4 +9,4 @@ A better method is to generate random numbers on demand, in this case we need a 
 
 One proposed solution is to sample by truncated normal distribution *N(1/k, σ<sup>2</sup>)*, this method is unfair unless *σ = 0*, where the distribution becomes Dirac distribution and everyone get the same amount of money--very boring. In general, sampling by normal distribution needs to compromise between fairness and funness, thus not a good solution.
 
-The correct solution is to sample by **Beta distribution**. It can be shown that if *X<sub>n</sub>* follows *Beta(c, c(k-1))*, *c > 0*, returning _mX<sub>k</sub>_ will guarantee fairness: every *X<sub>k</sub>* follow the same distribution *Beta(c, c(N-1))*, and it is not a boring distribution.
+The correct solution is to sample by **Beta distribution**. It can be shown that if *X<sub>k</sub>* follows *Beta(c, c(k-1))*, *c > 0*, returning _mX<sub>k</sub>_ will guarantee fairness: every *X<sub>k</sub>* follow the same distribution *Beta(c, c(N-1))*, and it is not a boring distribution.
