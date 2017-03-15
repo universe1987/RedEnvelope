@@ -18,27 +18,25 @@ def simulate(num_people, num_simulation, distribution_method):
     return sample, elapsed
 
 
-def calculate_moments(sample, n_moments):
+def evaluate_by_moments(sample, params):
+    n_moments = params.get('n_moments', 4)
     moments = np.zeros((n_moments, sample.shape[1]))
     aggregate = sample.copy()
     for i in xrange(n_moments):
         moments[i] = aggregate.mean(axis=0)
         aggregate *= sample
-    return moments
 
-
-def evaluate_by_moments(moments, threshold):
     epsilon = 0.0000001
     ratios = (moments.max(axis=1) + epsilon) / (moments.min(axis=1) + epsilon)
-    result = ratios.max()
-    print ratios
-    return result < threshold
+    print 'moment ratios =', ratios
+    deviation = abs(ratios - 1).max()
+    return deviation < params.get('threshold', 0.1)
 
 
-def evaluate_by_variance(moments, threshold):
-    var = moments[1] - moments[0] ** 2
-    print 'var =', var.min()
-    return var.min() > threshold
+def evaluate_by_variance(sample, params):
+    var = sample.var(axis=0)
+    print 'minimum variances =', var.min()
+    return var.min() > params.get('min_var', 0.001)
 
 
 def visualize(sample):
@@ -52,18 +50,24 @@ def visualize(sample):
 
 
 def evaluate(distribution_method, vis=False):
+    print '-' * 40
+    print 'Evaluating', distribution_method.func_name
     sample, elapsed = simulate(10, 100000, distribution_method)
-    print '{} seconds'.format(elapsed)
-    moments = calculate_moments(sample, 4)
-    fair = evaluate_by_moments(moments, 1.1)
-    fun = evaluate_by_variance(moments, 0.001)
-    efficient = elapsed < 1
-    status = 'PASSED' if fair and efficient and fun else 'FAILED'
-    fairness = 'FAIR' if fair else 'UNFAIR'
-    efficiency = 'WITHIN' if efficient else 'EXCEED'
-    funness = 'FUN' if fun else 'BORING'
-    print '{} {}, it is {}, {}, {} time limit'.format(
-        distribution_method.func_name, status, fairness, funness, efficiency)
+    print 'time elapsed:', elapsed
+    m_params = {'n_moments': 4, 'threshold': 0.1}
+    result = evaluate_by_moments(sample, m_params)
+    if not result:
+        print 'FAILED, moments does not match'
+        return
+    v_params = {'min_var': 0.001}
+    result = evaluate_by_variance(sample, v_params)
+    if not result:
+        print 'FAILED, variance is too small'
+        return
+    if elapsed > 1:
+        print 'FAILED, too slow'
+        return
+    print 'PASSED'
     if vis:
         visualize(sample)
 
