@@ -43,9 +43,14 @@ def visualize(sample):
     n_col = sample.shape[1]
     f, axarr = plt.subplots(2, 2)
     axarr[0, 0].hist(sample[:, 0], bins=100, normed=1)
+    axarr[0, 0].set_title('receiver 0')
     axarr[0, 1].hist(sample[:, n_col/3], bins=100, normed=1)
+    axarr[0, 1].set_title('receiver 1')
     axarr[1, 0].hist(sample[:, 2 * n_col/3], bins=100, normed=1)
+    axarr[1, 0].set_title('receiver 2')
     axarr[1, 1].hist(sample[:, -1], bins=100, normed=1)
+    axarr[1, 1].set_title('receiver 3')
+    plt.suptitle('sample by Beta(2, 2n-2)')
     plt.show()
 
 
